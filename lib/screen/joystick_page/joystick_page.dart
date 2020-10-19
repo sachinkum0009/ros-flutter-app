@@ -97,12 +97,13 @@ class _JoyStickPageState extends State<JoyStickPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                height: 400,
+                height: 205,
                 child: MyWebView(
                     title: 'Camera',
                     selectedUrl:
-                        'http://192.168.1.4:8080/stream_viewer?topic=/camera/rgb/image_raw'),
+                        'http://192.168.1.4:8080/stream?topic=/camera/rgb/image_raw&type=mjpeg&quality=30&width=320&height=200&default_transport=compressed'),
               ),
+              Padding(padding: EdgeInsets.all(40)),
               ActionChip(
                 label: Text(snapshot.data == Status.CONNECTED
                     ? 'DISCONNECT'
@@ -119,6 +120,7 @@ class _JoyStickPageState extends State<JoyStickPage> {
                   }
                 },
               ),
+              Padding(padding: EdgeInsets.all(20)),
               JoystickView(
                 onDirectionChanged: (_degrees, _distance) =>
                     _move(_degrees, _distance),

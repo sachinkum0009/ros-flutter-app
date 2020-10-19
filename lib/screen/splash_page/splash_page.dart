@@ -25,14 +25,14 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green[600],
+      backgroundColor: Colors.blue,
       body: Container(
         child: Center(
           child: Text(
-            "Splash Screen",
+            "Teleop Joy",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 24,
+              fontSize: 36,
             ),
           ),
         ),
