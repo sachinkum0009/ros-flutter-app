@@ -13,7 +13,7 @@ class _PublisherState extends State<Publisher> {
   Topic cmd_vel;
   @override
   void initState() {
-    ros = Ros(url: 'ws://192.168.42.104:9090');
+    ros = Ros(url: 'ws://192.168.1.4:9090');
     chatter = Topic(
         ros: ros,
         name: '/chatter',
