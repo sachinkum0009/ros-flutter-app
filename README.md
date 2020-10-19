@@ -7,4 +7,6 @@ Flutter Base Project.
 - [x] Splash Screen
 - [ ] BLoC Architecture
 - [x] JoyStick
-- [ ] ROS send topic messages
+- [x] ROS send topic messages
+- [ ] View Map
+- [ ] Visualize URDF
