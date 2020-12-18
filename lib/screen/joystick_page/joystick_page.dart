@@ -3,6 +3,7 @@ import 'package:control_pad/control_pad.dart';
 import 'package:my_app/screen/camera_page/camera_page.dart';
 import 'dart:math';
 import 'package:roslib/roslib.dart';
+import 'package:my_app/config/ros_param.dart';
 
 class JoyStickPage extends StatefulWidget {
   @override
@@ -27,7 +28,7 @@ class _JoyStickPageState extends State<JoyStickPage> {
 
   @override
   void initState() {
-    ros = Ros(url: 'ws://192.168.43.124:9090');
+    ros = Ros(url: 'ws://192.168.1.4:9090');
     chatter = Topic(
         ros: ros,
         name: '/chatter',
@@ -70,9 +71,9 @@ class _JoyStickPageState extends State<JoyStickPage> {
     print('done publihsed');
   }
 
-  void publishCmd(double _linear_speed, double _angular_speed) async {
-    var linear = {'x': _linear_speed, 'y': 0.0, 'z': 0.0};
-    var angular = {'x': 0.0, 'y': 0.0, 'z': _angular_speed};
+  void publishCmd(double _linearSpeed, double _angularSpeed) async {
+    var linear = {'x': _linearSpeed, 'y': 0.0, 'z': 0.0};
+    var angular = {'x': 0.0, 'y': 0.0, 'z': _angularSpeed};
     var twist = {'linear': linear, 'angular': angular};
     await cmd_vel.publish(twist);
     print('cmd published');
@@ -101,9 +102,9 @@ class _JoyStickPageState extends State<JoyStickPage> {
                 child: MyWebView(
                     title: 'Camera',
                     selectedUrl:
-                        'http://192.168.43.124:8080/stream?topic=/camera/rgb/image_raw&type=mjpeg&quality=30&width=320&height=200&default_transport=compressed'),
+                        'http://192.168.1.4:8080/stream?topic=/camera/rgb/image_raw&type=mjpeg&quality=30&width=320&height=200&default_transport=compressed'),
               ),
-              Padding(padding: EdgeInsets.all(40)),
+              Padding(padding: EdgeInsets.all(20)),
               ActionChip(
                 label: Text(snapshot.data == Status.CONNECTED
                     ? 'DISCONNECT'
@@ -120,7 +121,7 @@ class _JoyStickPageState extends State<JoyStickPage> {
                   }
                 },
               ),
-              Padding(padding: EdgeInsets.all(20)),
+              Padding(padding: EdgeInsets.all(10)),
               JoystickView(
                 onDirectionChanged: (_degrees, _distance) =>
                     _move(_degrees, _distance),
