@@ -14,8 +14,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   GlobalKey bottomNavigationKey = GlobalKey();
   final List<Widget> pages = [
-    MyWebView(title: 'Navigation', selectedUrl: 'http://192.168.1.4:8000/'),
+    MyWebView(title: 'Gazebo', selectedUrl: 'http://192.168.1.4:8080/'),
+    MyWebView(title: 'Map', selectedUrl: 'http://192.168.1.4:8000/'),
     JoyStickPage(),
+    MyWebView(title: 'RViz', selectedUrl: "http://192.168.1.4:8081"),
     SettingsScreen(),
   ];
   @override
@@ -34,6 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       bottomNavigationBar: FancyBottomNavigation(
         tabs: [
+          TabData(iconData: Icons.sim_card_outlined, title: "Gazebo"),
           TabData(
             iconData: Icons.map,
             title: "Map",
@@ -49,6 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
             //onclick: () => Navigator.of(context).push(
             //  MaterialPageRoute(builder: (context) => JoyStickPage()))),
           ),
+          TabData(iconData: Icons.radio, title: "RViz"),
           TabData(iconData: Icons.settings, title: "Setting"),
         ],
         initialSelection: 1,
