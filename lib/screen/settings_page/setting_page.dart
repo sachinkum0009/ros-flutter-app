@@ -9,70 +9,70 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  _showDialog() async {
-    await showDialog<String>(
-      context: context,
-      child: AlertDialog(
-        contentPadding: const EdgeInsets.all(16.0),
-        content: Row(
-          children: <Widget>[
-            Expanded(
-              child: TextField(
-                autofocus: true,
-                decoration: InputDecoration(
-                    labelText: 'ROS MASTER URI', hintText: 'eg. 192.168.1.4'),
-              ),
-            )
-          ],
-        ),
-        actions: <Widget>[
-          FlatButton(
-              child: const Text('CANCEL'),
-              onPressed: () {
-                Navigator.pop(context);
-              }),
-          FlatButton(
-              child: const Text('OPEN'),
-              onPressed: () {
-                Navigator.pop(context);
-              })
-        ],
-      ),
-    );
-  }
+  // _showDialog() async {
+  //   await showDialog<String>(
+  //     context: context,
+  //     child: AlertDialog(
+  //       contentPadding: const EdgeInsets.all(16.0),
+  //       content: Row(
+  //         children: <Widget>[
+  //           Expanded(
+  //             child: TextField(
+  //               autofocus: true,
+  //               decoration: InputDecoration(
+  //                   labelText: 'ROS MASTER URI', hintText: 'eg. 192.168.1.4'),
+  //             ),
+  //           )
+  //         ],
+  //       ),
+  //       actions: <Widget>[
+  //         FlatButton(
+  //             child: const Text('CANCEL'),
+  //             onPressed: () {
+  //               Navigator.pop(context);
+  //             }),
+  //         FlatButton(
+  //             child: const Text('OPEN'),
+  //             onPressed: () {
+  //               Navigator.pop(context);
+  //             })
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // show topic dialog
-  _showTopicDialog() async {
-    await showDialog<String>(
-      context: context,
-      child: AlertDialog(
-        contentPadding: const EdgeInsets.all(16.0),
-        content: Row(
-          children: <Widget>[
-            Expanded(
-              child: TextField(
-                autofocus: true,
-                decoration: InputDecoration(
-                    labelText: 'Topic Name', hintText: 'eg. /cmd_vel'),
-              ),
-            )
-          ],
-        ),
-        actions: <Widget>[
-          FlatButton(
-              child: const Text('CANCEL'),
-              onPressed: () {
-                Navigator.pop(context);
-              }),
-          FlatButton(
-              child: const Text('OPEN'),
-              onPressed: () {
-                Navigator.pop(context);
-              })
-        ],
-      ),
-    );
-  }
+  // _showTopicDialog() async {
+  //   await showDialog<String>(
+  //     context: context,
+  //     child: AlertDialog(
+  //       contentPadding: const EdgeInsets.all(16.0),
+  //       content: Row(
+  //         children: <Widget>[
+  //           Expanded(
+  //             child: TextField(
+  //               autofocus: true,
+  //               decoration: InputDecoration(
+  //                   labelText: 'Topic Name', hintText: 'eg. /cmd_vel'),
+  //             ),
+  //           )
+  //         ],
+  //       ),
+  //       actions: <Widget>[
+  //         FlatButton(
+  //             child: const Text('CANCEL'),
+  //             onPressed: () {
+  //               Navigator.pop(context);
+  //             }),
+  //         FlatButton(
+  //             child: const Text('OPEN'),
+  //             onPressed: () {
+  //               Navigator.pop(context);
+  //             })
+  //       ],
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +90,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 leading: Icon(Icons.cloud_queue),
                 onTap: () {
                   // show text field
-                  _showDialog();
+                  // _showDialog();
+                  print('some tapped');
                 },
               ),
               SettingsTile(
@@ -98,7 +99,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 leading: Icon(Icons.info_outline_rounded),
                 onTap: () {
                   // show topic field
-                  _showTopicDialog();
+                  // _showTopicDialog();
+                  print('topic dialog');
                 },
               ),
             ],
