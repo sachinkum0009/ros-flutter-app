@@ -27,7 +27,7 @@ class _JoyStickPageState extends State<JoyStickPage> {
 
   @override
   void initState() {
-    ros = Ros(url: 'ws://192.168.43.124:9090');
+    ros = Ros(url: 'ws://192.168.1.11:9090');
     chatter = Topic(
         ros: ros,
         name: '/chatter',
@@ -101,7 +101,7 @@ class _JoyStickPageState extends State<JoyStickPage> {
                 child: MyWebView(
                     title: 'Camera',
                     selectedUrl:
-                        'http://192.168.43.124:8080/stream?topic=/camera/rgb/image_raw&type=mjpeg&quality=30&width=320&height=200&default_transport=compressed'),
+                        'http://192.168.1.11:8080/stream?topic=/camera/rgb/image_raw&type=mjpeg&quality=30&width=100&height=100&default_transport=compressed'),
               ),
               Padding(padding: EdgeInsets.all(40)),
               ActionChip(
