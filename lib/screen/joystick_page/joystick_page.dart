@@ -6,6 +6,8 @@ import 'package:roslib/roslib.dart';
 import 'package:my_app/config/ros_param.dart';
 
 class JoyStickPage extends StatefulWidget {
+  JoyStickPage({Key key, this.ip}) : super(key: key);
+  final String ip;
   @override
   _JoyStickPageState createState() => _JoyStickPageState();
 }
@@ -26,9 +28,16 @@ class _JoyStickPageState extends State<JoyStickPage> {
     publishCmd(linear_speed, angular_speed);
   }
 
+  String imageIp;
+
   @override
   void initState() {
-    ros = Ros(url: 'ws://192.168.1.4:9090');
+    String ipAddr = widget.ip;
+    String webIp = "http://$ipAddr:8081";
+    String rosIp = 'ws://$ipAddr:9090';
+    imageIp =
+        'http://$ipAddr:8080/stream?topic=/camera/rgb/image_raw&type=mjpeg&quality=30&width=320&height=200&default_transport=compressed';
+    ros = Ros(url: rosIp);
     chatter = Topic(
         ros: ros,
         name: '/chatter',
@@ -99,10 +108,7 @@ class _JoyStickPageState extends State<JoyStickPage> {
             children: [
               Container(
                 height: 205,
-                child: MyWebView(
-                    title: 'Camera',
-                    selectedUrl:
-                        'http://192.168.1.4:8080/stream?topic=/camera/rgb/image_raw&type=mjpeg&quality=30&width=320&height=200&default_transport=compressed'),
+                child: MyWebView(title: 'Camera', selectedUrl: imageIp),
               ),
               Padding(padding: EdgeInsets.all(20)),
               ActionChip(

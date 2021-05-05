@@ -5,21 +5,32 @@ import 'package:flutter/material.dart';
 import 'package:my_app/screen/settings_page/setting_page.dart';
 
 class MyHomePage extends StatefulWidget {
+  MyHomePage({Key key, this.ip}) : super(key: key);
+  final String ip;
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   int currentPage = 1;
+  List<Widget> pages;
+  @override
+  void initState() {
+    super.initState();
+    String ipAddr = widget.ip;
+    String webIp = "http://$ipAddr:8081";
+    pages = [
+      MyWebView(title: 'Map', selectedUrl: 'http://' + ipAddr + ':8000/'),
+      JoyStickPage(
+        ip: widget.ip,
+      ),
+      MyWebView(title: 'RViz', selectedUrl: webIp),
+      SettingsScreen(),
+    ];
+  }
 
   GlobalKey bottomNavigationKey = GlobalKey();
-  final List<Widget> pages = [
-    MyWebView(title: 'Gazebo', selectedUrl: 'http://192.168.1.4:8080/'),
-    MyWebView(title: 'Map', selectedUrl: 'http://192.168.1.4:8000/'),
-    JoyStickPage(),
-    MyWebView(title: 'RViz', selectedUrl: "http://192.168.1.4:8081"),
-    SettingsScreen(),
-  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,21 +47,13 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       bottomNavigationBar: FancyBottomNavigation(
         tabs: [
-          TabData(iconData: Icons.sim_card_outlined, title: "Gazebo"),
           TabData(
             iconData: Icons.map,
             title: "Map",
-            //onclick: () {
-            // final FancyBottomNavigationState fState =
-            //   bottomNavigationKey.currentState;
-            //fState.setPage(2);
-            //}
           ),
           TabData(
             iconData: Icons.gamepad,
             title: "Control",
-            //onclick: () => Navigator.of(context).push(
-            //  MaterialPageRoute(builder: (context) => JoyStickPage()))),
           ),
           TabData(iconData: Icons.radio, title: "RViz"),
           TabData(iconData: Icons.settings, title: "Setting"),
