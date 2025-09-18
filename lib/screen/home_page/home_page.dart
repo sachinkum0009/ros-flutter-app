@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_app/repos/models/publisher.dart';
 import 'package:my_app/screen/button_page/button_page.dart';
 import 'package:my_app/screen/joystick_page/joystick_page.dart';
+import 'package:my_app/screen/settings_page/settings_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -15,6 +16,17 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text("Teleop Joy"),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: JoyStickPage(),
     );

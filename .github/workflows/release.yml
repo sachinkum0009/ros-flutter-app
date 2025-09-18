@@ -1,0 +1,92 @@
+---
+name: Create Release
+
+"on":
+  push:
+    tags:
+      - 'v*'  # Triggers on version tags like v1.0.0, v1.1.0, etc.
+
+jobs:
+  create-release:
+    name: Build and Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+            **/.packages
+            **/.flutter-plugins
+            **/.flutter-plugin-dependencies
+            **/.dart_tool/package_config.json
+          key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            flutter-${{ runner.os }}-
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Get tag name
+        id: tag
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create Release and Upload APK
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ROS Flutter App ${{ steps.tag.outputs.tag }}
+          body: |
+            ## 🚀 ROS Flutter App ${{ steps.tag.outputs.tag }}
+
+            ✨ **Features**
+            - 🎮 Configurable ROS IP address and topic names
+            - ⚙️ Settings page with persistent storage
+            - 🕹️ Joystick control for robot movement
+            - 📹 Live camera feed integration
+            - 🔄 Automatic reconnection when settings change
+
+            📱 **Installation**
+            1. Download the APK file below
+            2. Enable "Install from unknown sources" on your Android device
+            3. Install the APK
+
+            🤖 **ROS Setup**
+            Make sure you have the following ROS components running:
+            ```bash
+            roscore
+            roslaunch rosbridge_server rosbridge_websocket.launch
+            ```
+
+            🔧 **Default Configuration**
+            - ROS IP: `192.168.1.11:9090`
+            - Camera: `192.168.1.11:8080`
+            - Topics: `/chatter`, `/cmd_vel`, `/counter`
+
+            Use the settings page (⚙️ icon) to customize for your setup!
+          draft: false
+          prerelease: false
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+          token: ${{ secrets.GITHUB_TOKEN }}

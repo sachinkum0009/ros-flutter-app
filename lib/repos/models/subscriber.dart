@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roslib/roslib.dart';
+import 'package:my_app/services/settings_service.dart';
 
 class Publisher extends StatefulWidget {
   @override
@@ -7,38 +8,64 @@ class Publisher extends StatefulWidget {
 }
 
 class _PublisherState extends State<Publisher> {
-  Ros ros;
-  Topic chatter;
+  Ros? ros;
+  Topic? chatter;
+  SettingsService? _settingsService;
+  bool _isInitialized = false;
 
   @override
   void initState() {
-    ros = Ros(url: 'ws://192.168.42.58:9090');
-    chatter = Topic(
-        ros: ros,
-        name: '/chatter',
-        type: "std_msgs/String",
-        reconnectOnClose: true,
-        queueLength: 10,
-        queueSize: 10);
     super.initState();
+    _initializeSettings();
+  }
+
+  Future<void> _initializeSettings() async {
+    _settingsService = await SettingsService.getInstance();
+    await _initializeROS();
+    setState(() {
+      _isInitialized = true;
+    });
+  }
+
+  Future<void> _initializeROS() async {
+    if (_settingsService != null) {
+      ros = Ros(url: _settingsService!.rosUrl);
+      chatter = Topic(
+          ros: ros!,
+          name: _settingsService!.chatterTopic,
+          type: "std_msgs/String",
+          reconnectOnClose: true,
+          queueLength: 10,
+          queueSize: 10);
+    }
   }
 
   void initConnection() async {
-    ros.connect();
-    await chatter.subscribe();
-    setState(() {});
+    if (ros != null && chatter != null) {
+      ros!.connect();
+      await chatter!.subscribe();
+      setState(() {});
+    }
   }
 
   void destroyConnection() async {
-    await chatter.unsubscribe();
-    await ros.close();
+    if (chatter != null) {
+      await chatter!.unsubscribe();
+    }
+    if (ros != null) {
+      await ros!.close();
+    }
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized || ros == null) {
+      return Center(child: CircularProgressIndicator());
+    }
+
     return StreamBuilder<Object>(
-      stream: ros.statusStream,
+      stream: ros!.statusStream,
       builder: (context, snapshot) {
         return Center(
           child: Column(
@@ -62,7 +89,7 @@ class _PublisherState extends State<Publisher> {
                 },
               ),
               StreamBuilder(
-                stream: chatter.subscription,
+                stream: chatter!.subscription,
                 builder: (context2, snapshot2) {
                   if (snapshot2.hasData) {
                     return Text('${snapshot2.data['msg']}');
