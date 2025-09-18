@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:control_pad/control_pad.dart';
 import 'package:my_app/screen/camera_page/camera_page.dart';
+import 'package:my_app/services/settings_service.dart';
 import 'dart:math';
 import 'package:roslib/roslib.dart';
 
@@ -10,10 +11,12 @@ class JoyStickPage extends StatefulWidget {
 }
 
 class _JoyStickPageState extends State<JoyStickPage> {
-  Ros ros;
-  Topic chatter;
-  Topic counter;
-  Topic cmd_vel;
+  Ros? ros;
+  Topic? chatter;
+  Topic? counter;
+  Topic? cmd_vel;
+  SettingsService? _settingsService;
+  bool _isInitialized = false;
 
   void _move(double _degrees, double _distance) {
     print(
@@ -27,69 +30,98 @@ class _JoyStickPageState extends State<JoyStickPage> {
 
   @override
   void initState() {
-    ros = Ros(url: 'ws://192.168.1.11:9090');
-    chatter = Topic(
-        ros: ros,
-        name: '/chatter',
+    super.initState();
+    _initializeSettings();
+  }
+
+  Future<void> _initializeSettings() async {
+    _settingsService = await SettingsService.getInstance();
+    await _initializeROS();
+    setState(() {
+      _isInitialized = true;
+    });
+  }
+
+  Future<void> _initializeROS() async {
+    if (_settingsService != null) {
+      ros = Ros(url: _settingsService!.rosUrl);
+      chatter = Topic(
+          ros: ros!,
+          name: _settingsService!.chatterTopic,
+          type: "std_msgs/String",
+          reconnectOnClose: true,
+          queueLength: 10,
+          queueSize: 10);
+
+      cmd_vel = Topic(
+          ros: ros!,
+          name: _settingsService!.cmdVelTopic,
+          type: "geometry_msgs/Twist",
+          reconnectOnClose: true,
+          queueLength: 10,
+          queueSize: 10);
+
+      counter = Topic(
+        ros: ros!,
+        name: _settingsService!.counterTopic,
         type: "std_msgs/String",
         reconnectOnClose: true,
+        queueSize: 10,
         queueLength: 10,
-        queueSize: 10);
-
-    cmd_vel = Topic(
-        ros: ros,
-        name: '/cmd_vel',
-        type: "geometry_msgs/Twist",
-        reconnectOnClose: true,
-        queueLength: 10,
-        queueSize: 10);
-
-    counter = Topic(
-      ros: ros,
-      name: '/counter',
-      type: "std_msgs/String",
-      reconnectOnClose: true,
-      queueSize: 10,
-      queueLength: 10,
-    );
-    super.initState();
+      );
+    }
   }
 
   void initConnection() async {
-    ros.connect();
-    await chatter.subscribe();
+    if (ros != null && chatter != null && counter != null && cmd_vel != null) {
+      ros!.connect();
+      await chatter!.subscribe();
 
-    await counter.advertise();
-    await cmd_vel.advertise();
-    setState(() {});
+      await counter!.advertise();
+      await cmd_vel!.advertise();
+      setState(() {});
+    }
   }
 
   void publishCounter() async {
-    var msg = {'data': 'hello'};
-    await counter.publish(msg);
-    print('done publihsed');
+    if (counter != null) {
+      var msg = {'data': 'hello'};
+      await counter!.publish(msg);
+      print('done publihsed');
+    }
   }
 
   void publishCmd(double _linear_speed, double _angular_speed) async {
-    var linear = {'x': _linear_speed, 'y': 0.0, 'z': 0.0};
-    var angular = {'x': 0.0, 'y': 0.0, 'z': _angular_speed};
-    var twist = {'linear': linear, 'angular': angular};
-    await cmd_vel.publish(twist);
-    print('cmd published');
+    if (cmd_vel != null) {
+      var linear = {'x': _linear_speed, 'y': 0.0, 'z': 0.0};
+      var angular = {'x': 0.0, 'y': 0.0, 'z': _angular_speed};
+      var twist = {'linear': linear, 'angular': angular};
+      await cmd_vel!.publish(twist);
+      print('cmd published');
+    }
   }
 
   void destroyConnection() async {
-    await chatter.unsubscribe();
-
-    await counter.unadvertise();
-    await ros.close();
+    if (chatter != null) {
+      await chatter!.unsubscribe();
+    }
+    if (counter != null) {
+      await counter!.unadvertise();
+    }
+    if (ros != null) {
+      await ros!.close();
+    }
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized || ros == null) {
+      return Center(child: CircularProgressIndicator());
+    }
+
     return StreamBuilder<Object>(
-      stream: ros.statusStream,
+      stream: ros!.statusStream,
       builder: (context, snapshot) {
         return Center(
           child: Column(
@@ -100,8 +132,7 @@ class _JoyStickPageState extends State<JoyStickPage> {
                 height: 205,
                 child: MyWebView(
                     title: 'Camera',
-                    selectedUrl:
-                        'http://192.168.1.11:8080/stream?topic=/camera/rgb/image_raw&type=mjpeg&quality=30&width=100&height=100&default_transport=compressed'),
+                    selectedUrl: _settingsService!.cameraUrl),
               ),
               Padding(padding: EdgeInsets.all(40)),
               ActionChip(

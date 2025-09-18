@@ -30,6 +30,7 @@ dependencies:
   list_english_words: ^0.1.1+2
   roslib: ^0.0.3
   webview_flutter: ^1.0.3
+  shared_preferences: ^2.0.15
 
 dev_dependencies:
   flutter_test:
