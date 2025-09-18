@@ -12,7 +12,7 @@ Flutter Base Project.
 - [x] ROS send topic messages
 - [ ] View Map
 - [ ] Visualize URDF
-- [ ] Editable IP Address and topic names
+- [x] Editable IP Address and topic names
 - [ ] add files for the web camera and navigation map
 
 ## ROS launch files

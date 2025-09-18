@@ -10,7 +10,7 @@ class JoyStickPage extends StatefulWidget {
   _JoyStickPageState createState() => _JoyStickPageState();
 }
 
-class _JoyStickPageState extends State<JoyStickPage> {
+class _JoyStickPageState extends State<JoyStickPage> with RouteAware {
   Ros? ros;
   Topic? chatter;
   Topic? counter;
@@ -32,6 +32,27 @@ class _JoyStickPageState extends State<JoyStickPage> {
   void initState() {
     super.initState();
     _initializeSettings();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // This is called when returning from settings page
+    // We'll reinitialize in case settings changed
+    if (_isInitialized) {
+      _reinitializeOnSettingsChange();
+    }
+  }
+
+  Future<void> _reinitializeOnSettingsChange() async {
+    // Disconnect current connections if they exist
+    if (ros != null) {
+      await destroyConnection();
+    }
+    
+    // Reinitialize with new settings
+    await _initializeROS();
+    setState(() {});
   }
 
   Future<void> _initializeSettings() async {
@@ -117,7 +138,16 @@ class _JoyStickPageState extends State<JoyStickPage> {
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized || ros == null) {
-      return Center(child: CircularProgressIndicator());
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Loading ROS configuration...')
+          ],
+        ),
+      );
     }
 
     return StreamBuilder<Object>(
@@ -134,7 +164,28 @@ class _JoyStickPageState extends State<JoyStickPage> {
                     title: 'Camera',
                     selectedUrl: _settingsService!.cameraUrl),
               ),
-              Padding(padding: EdgeInsets.all(40)),
+              Padding(padding: EdgeInsets.all(16)),
+              // Display current connection info
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'ROS: ${_settingsService!.rosUrl}',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'Topics: ${_settingsService!.cmdVelTopic}, ${_settingsService!.chatterTopic}',
+                      style: TextStyle(fontSize: 10),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(padding: EdgeInsets.all(16)),
               ActionChip(
                 label: Text(snapshot.data == Status.CONNECTED
                     ? 'DISCONNECT'
