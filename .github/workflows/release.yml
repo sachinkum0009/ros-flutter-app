@@ -1,0 +1,76 @@
+name: Create Release on Tag
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers on version tags like v1.0.0, v1.1.0, etc.
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.16.0'
+        channel: 'stable'
+        
+    - name: Get dependencies
+      run: flutter pub get
+      
+    - name: Build APK
+      run: flutter build apk --release
+      
+    - name: Get tag name
+      id: tag
+      run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.tag.outputs.tag }}
+        release_name: ROS Flutter App ${{ steps.tag.outputs.tag }}
+        body: |
+          ## Changes in ${{ steps.tag.outputs.tag }}
+          
+          - Automated release created from tag
+          - Built with Flutter stable channel
+          - APK ready for Android devices
+          
+          ### Installation
+          1. Download the APK file below
+          2. Enable "Install from unknown sources" on your Android device
+          3. Install the APK
+          
+          ### ROS Setup
+          Make sure you have the following ROS components running:
+          ```bash
+          roscore
+          roslaunch rosbridge_server rosbridge_websocket.launch
+          ```
+        draft: false
+        prerelease: false
+        
+    - name: Upload APK to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/app/outputs/flutter-apk/app-release.apk
+        asset_name: ros-flutter-app-${{ steps.tag.outputs.tag }}.apk
+        asset_content_type: application/vnd.android.package-archive

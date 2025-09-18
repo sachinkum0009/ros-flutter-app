@@ -1,22 +1,74 @@
-name: Main workflow
-on: [push]
+name: Build and Release
+
+on: 
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  release:
+    types: [created]
+
 jobs:
-  run:
-    name: Run
-    runs-on: ${{ matrix.operating-system }}
-    strategy:
-      matrix:
-        operating-system: [ubuntu-latest, windows-latest, macos-latest]
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-java@v1
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Java
+      uses: actions/setup-java@v4
       with:
-        java-version: '12.x'
-    - uses: subosito/flutter-action@v1
+        distribution: 'zulu'
+        java-version: '17'
+        
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
       with:
-        channel: 'stable' # or: 'beta', 'dev' or 'master'
-    - run: flutter pub get
-    # - run: flutter test
-    - run: flutter build apk
+        flutter-version: '3.16.0'
+        channel: 'stable'
+        
+    - name: Get dependencies
+      run: flutter pub get
+      
+    - name: Analyze code
+      run: flutter analyze
+      
+    # Uncomment when tests are available
+    # - name: Run tests
+    #   run: flutter test
+      
+    - name: Build APK
+      run: flutter build apk --release
+      
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-apk
+        path: build/app/outputs/flutter-apk/app-release.apk
+        retention-days: 30
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    
+    steps:
+    - name: Download APK
+      uses: actions/download-artifact@v4
+      with:
+        name: release-apk
+        
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./app-release.apk
+        asset_name: ros-flutter-app-${{ github.event.release.tag_name }}.apk
+        asset_content_type: application/vnd.android.package-archive
 
     
