@@ -1,12 +1,10 @@
-name: Build and Release
+name: Build and Test
 
 on: 
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  release:
-    types: [created]
 
 jobs:
   build:
@@ -26,14 +24,27 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.16.0'
         channel: 'stable'
+        cache: true
+        
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.pub-cache
+          **/.packages
+          **/.flutter-plugins
+          **/.flutter-plugin-dependencies
+          **/.dart_tool/package_config.json
+        key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          flutter-${{ runner.os }}-
         
     - name: Get dependencies
       run: flutter pub get
       
     - name: Analyze code
-      run: flutter analyze
+      run: flutter analyze --fatal-infos
       
     # Uncomment when tests are available
     # - name: Run tests
@@ -45,30 +56,8 @@ jobs:
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
-        name: release-apk
+        name: app-release-apk
         path: build/app/outputs/flutter-apk/app-release.apk
         retention-days: 30
-
-  release:
-    name: Create Release
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-    
-    steps:
-    - name: Download APK
-      uses: actions/download-artifact@v4
-      with:
-        name: release-apk
-        
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./app-release.apk
-        asset_name: ros-flutter-app-${{ github.event.release.tag_name }}.apk
-        asset_content_type: application/vnd.android.package-archive
 
     

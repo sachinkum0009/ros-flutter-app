@@ -1,4 +1,4 @@
-name: Create Release on Tag
+name: Create Release
 
 on:
   push:
@@ -7,8 +7,10 @@ on:
 
 jobs:
   create-release:
-    name: Create Release
+    name: Build and Create Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
     - name: Checkout code
@@ -23,8 +25,21 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.16.0'
         channel: 'stable'
+        cache: true
+        
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.pub-cache
+          **/.packages
+          **/.flutter-plugins
+          **/.flutter-plugin-dependencies
+          **/.dart_tool/package_config.json
+        key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          flutter-${{ runner.os }}-
         
     - name: Get dependencies
       run: flutter pub get
@@ -36,41 +51,41 @@ jobs:
       id: tag
       run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
       
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create Release and Upload APK
+      uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.tag.outputs.tag }}
-        release_name: ROS Flutter App ${{ steps.tag.outputs.tag }}
+        name: ROS Flutter App ${{ steps.tag.outputs.tag }}
         body: |
-          ## Changes in ${{ steps.tag.outputs.tag }}
+          ## 🚀 ROS Flutter App ${{ steps.tag.outputs.tag }}
           
-          - Automated release created from tag
-          - Built with Flutter stable channel
-          - APK ready for Android devices
+          ✨ **Features**
+          - 🎮 Configurable ROS IP address and topic names
+          - ⚙️ Settings page with persistent storage
+          - 🕹️ Joystick control for robot movement
+          - 📹 Live camera feed integration
+          - 🔄 Automatic reconnection when settings change
           
-          ### Installation
+          📱 **Installation**
           1. Download the APK file below
           2. Enable "Install from unknown sources" on your Android device
           3. Install the APK
           
-          ### ROS Setup
+          🤖 **ROS Setup**
           Make sure you have the following ROS components running:
           ```bash
           roscore
           roslaunch rosbridge_server rosbridge_websocket.launch
           ```
+          
+          🔧 **Default Configuration**
+          - ROS IP: `192.168.1.11:9090`
+          - Camera: `192.168.1.11:8080`
+          - Topics: `/chatter`, `/cmd_vel`, `/counter`
+          
+          Use the settings page (⚙️ icon) to customize for your setup!
         draft: false
         prerelease: false
-        
-    - name: Upload APK to Release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: build/app/outputs/flutter-apk/app-release.apk
-        asset_name: ros-flutter-app-${{ steps.tag.outputs.tag }}.apk
-        asset_content_type: application/vnd.android.package-archive
+        files: |
+          build/app/outputs/flutter-apk/app-release.apk
+        token: ${{ secrets.GITHUB_TOKEN }}

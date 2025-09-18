@@ -17,17 +17,18 @@ The settings page allows users to configure:
 
 ## CI/CD Pipeline
 
-This repository is configured with GitHub Actions to automatically:
+This repository is configured with GitHub Actions to automatically build and release the Flutter app.
 
-### Build Process
+### Build Process ✅
 - **On every push/PR**: Builds and tests the Flutter app
+- **Modern Actions**: Uses latest GitHub Actions with caching for faster builds
+- **Code Analysis**: Runs `flutter analyze` to catch potential issues
 - **Artifacts**: APK files are stored as build artifacts for 30 days
-- **Analysis**: Code is analyzed for issues before building
 
-### Release Process
+### Release Process 🚀
 - **Automatic releases**: Created when you push a version tag (e.g., `v1.0.0`)
-- **APK attachment**: Release APK is automatically attached to GitHub releases
-- **Release notes**: Auto-generated with installation instructions
+- **APK attachment**: Release APK is automatically built and attached to GitHub releases
+- **Rich release notes**: Auto-generated with emojis, installation instructions, and configuration details
 
 ### Creating a Release
 To create a new release with APK:
@@ -38,7 +39,13 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-This will trigger the release workflow and create a GitHub release with the APK attached.
+This will trigger the release workflow, build a fresh APK, and create a GitHub release with the APK attached.
+
+### Recent CI/CD Improvements
+- 🔧 **Fixed deprecated actions**: Updated to modern GitHub Actions
+- ⚡ **Added caching**: Faster builds with Flutter dependency caching  
+- 🎯 **Better error handling**: Improved workflow reliability
+- 📱 **Enhanced release notes**: Rich formatting with installation guides
 
 ## Task List
 
